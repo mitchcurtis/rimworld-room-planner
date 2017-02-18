@@ -14,4 +14,6 @@ Click and drag on the screen to recreate it:
 
 ![RimWorld Room Planner](https://github.com/mitchcurtis/rimworld-room-planner/blob/master/rimworld-room-planner.gif "RimWorld Room Planner")
 
-Once the size of the area you've drawn matches the one in-game, the preferred room size can be adjusted to find a decent size that is the same for each room.
+Once the size of the area you've drawn matches the one in-game, the preferred room size can be adjusted to find a decent size that is the same for each room:
+
+![RimWorld Room Planner - buttons](https://github.com/mitchcurtis/rimworld-room-planner/blob/master/rimworld-room-planner-buttons.gif "RimWorld Room Planner - buttons")
