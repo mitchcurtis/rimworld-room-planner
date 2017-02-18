@@ -8,27 +8,38 @@
         body {
             background: #000;
         }
-        /*         canvas {
+        #sidePanel {
             position: absolute;
             top: 0;
             left: 0;
-            height: 100%;
-            width: 100%;
-        } */
+            z-index: 1;
+            margin-top: 10px;
+            margin-left: 10px;
+        }
+        #roomCountDiv {
+            display: inline;
+        }
+        .text {
+            color: #ffefef
+        }
     </style>
 </head>
 
 <body>
     <canvas height="600" width="600"></canvas>
+    <div id="sidePanel">
+        <span id="roomSizeSpan">
+            <button id="decreaseRoomCount">-</button>
+            <div id="roomCountDiv" class="text">Preferred room count: 3</div>
+            <button id="increaseRoomCount">+</button>
+        <span>
+    </div>
     <script>
         var canvas = document.getElementsByTagName('canvas')[0],
             ctx = null,
             grad = null,
             body = document.getElementsByTagName('body')[0],
             color = 255;
-
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
 
         var pressX = 0;
         var pressY = 0;
@@ -38,11 +49,33 @@
         var releaseX = 0;
         var releaseY = 0;
         var drawRoom = false;
+        var preferredRoomCount = 3;
 
         ctx = canvas.getContext('2d');
         if (ctx) {
             setupEvents();
             draw();
+        }
+
+        var roomCountDiv = document.getElementById("roomCountDiv");
+        var decreaseRoomCountButton = document.getElementById("decreaseRoomCount");
+        decreaseRoomCountButton.onmousedown = function() {
+            --preferredRoomCount;
+            if (preferredRoomCount < 1)
+                preferredRoomCount = 1;
+            roomCountDiv.innerHTML = "Preferred room count: " + preferredRoomCount;
+            draw();
+        }
+        var increaseRoomCount = document.getElementById("increaseRoomCount");
+        increaseRoomCount.onmousedown = function() {
+            ++preferredRoomCount;
+            roomCountDiv.innerHTML = "Preferred room count: " + preferredRoomCount;
+            draw();
+        }
+
+        window.onload = function() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
         }
 
         // http://stackoverflow.com/a/17130415/904422
@@ -58,7 +91,7 @@
         }
 
         function setupEvents() {
-            body.onmousedown = function(event) {
+            canvas.onmousedown = function(event) {
                 if (event.button === 0) {
                     isPressed = true;
                     drawRoom = true;
@@ -73,9 +106,7 @@
                 }
             }
 
-            body.onmousemove = function(event) {
-                //                 var width = window.innerWidth;
-                //                 var height = window.innerHeight;
+            canvas.onmousemove = function(event) {
                 var mousePos = getMousePos(canvas, event);
                 currentMouseX = mousePos.x;
                 currentMouseY = mousePos.y;
@@ -85,7 +116,7 @@
                 draw();
             };
 
-            body.onmouseup = function(event) {
+            canvas.onmouseup = function(event) {
                 currentMouseX = -1;
                 currentMouseY = -1;
                 var mousePos = getMousePos(canvas, event);
@@ -114,16 +145,36 @@
             var innerTilesWide = Math.max(0, tilesWide - 2);
             var innerTilesHigh = Math.max(0, tilesHigh - 2);
 
-            //ctx.fillRect(areaX, areaY, areaWidth, areaHeight);
+            var distributeHorizontally = tilesWide > tilesHigh;
+            var roomWidth = 0;
+            var roomHeight = 0;
+            if (distributeHorizontally && innerTilesWide >= 5) {
+                // We need preferredRoomCount - 1 walls as well.
+                roomWidth = (innerTilesWide - (preferredRoomCount - 1)) / preferredRoomCount;
+            } else if (!distributeHorizontally && innerTilesHigh >= 5) {
+                roomHeight = (innerTilesHigh - (preferredRoomCount - 1)) / preferredRoomCount;
+            }
 
+            var wallColour = "#aa3333";
             ctx.strokeStyle = "black";
             for (var row = 0; row < tilesHigh; ++row) {
                 for (var column = 0; column < tilesWide; ++column) {
                     var isEdge = (column == 0 || column == tilesWide - 1 || row == 0 || row == tilesHigh - 1);
                     if (isEdge)
-                        ctx.fillStyle = "#aa3333";
-                    else
-                        ctx.fillStyle = "transparent";
+                        ctx.fillStyle = wallColour;
+                    else {
+                        ctx.fillStyle = "#222222";
+
+                        if (roomWidth > 0) {
+                            var wallsEncountered = column / (preferredRoomCount + 1);
+                            if (wallsEncountered - Math.floor(wallsEncountered) == 0)
+                                ctx.fillStyle = wallColour;
+                        } else if (roomHeight > 0) {
+                            var wallsEncountered = row / (preferredRoomCount + 1);
+                            if (wallsEncountered - Math.floor(wallsEncountered) == 0)
+                                ctx.fillStyle = wallColour;
+                        }
+                    }
                     ctx.fillRect(areaX + (column * tileWidth), areaY + (row * tileHeight), tileWidth, tileHeight);
                     ctx.strokeRect(areaX + (column * tileWidth), areaY + (row * tileHeight), tileWidth, tileHeight);
                 }
