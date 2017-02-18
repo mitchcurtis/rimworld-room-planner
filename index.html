@@ -16,7 +16,7 @@
             margin-top: 10px;
             margin-left: 10px;
         }
-        #roomCountDiv {
+        #roomSizeDiv {
             display: inline;
         }
         .text {
@@ -29,9 +29,9 @@
     <canvas height="600" width="600"></canvas>
     <div id="sidePanel">
         <span id="roomSizeSpan">
-            <button id="decreaseRoomCount">-</button>
-            <div id="roomCountDiv" class="text">Preferred room count: 3</div>
-            <button id="increaseRoomCount">+</button>
+            <button id="decreaseRoomSize">-</button>
+            <div id="roomSizeDiv" class="text">Preferred room size: 3</div>
+            <button id="increaseRoomSize">+</button>
         <span>
     </div>
     <script>
@@ -49,7 +49,7 @@
         var releaseX = 0;
         var releaseY = 0;
         var drawRoom = false;
-        var preferredRoomCount = 3;
+        var preferredRoomSize = 3;
 
         ctx = canvas.getContext('2d');
         if (ctx) {
@@ -57,19 +57,19 @@
             draw();
         }
 
-        var roomCountDiv = document.getElementById("roomCountDiv");
-        var decreaseRoomCountButton = document.getElementById("decreaseRoomCount");
-        decreaseRoomCountButton.onmousedown = function() {
-            --preferredRoomCount;
-            if (preferredRoomCount < 1)
-                preferredRoomCount = 1;
-            roomCountDiv.innerHTML = "Preferred room count: " + preferredRoomCount;
+        var roomSizeDiv = document.getElementById("roomSizeDiv");
+        var decreaseRoomSizeButton = document.getElementById("decreaseRoomSize");
+        decreaseRoomSizeButton.onmousedown = function() {
+            --preferredRoomSize;
+            if (preferredRoomSize < 1)
+                preferredRoomSize = 1;
+            roomSizeDiv.innerHTML = "Preferred room size: " + preferredRoomSize;
             draw();
         }
-        var increaseRoomCount = document.getElementById("increaseRoomCount");
-        increaseRoomCount.onmousedown = function() {
-            ++preferredRoomCount;
-            roomCountDiv.innerHTML = "Preferred room count: " + preferredRoomCount;
+        var increaseRoomSize = document.getElementById("increaseRoomSize");
+        increaseRoomSize.onmousedown = function() {
+            ++preferredRoomSize;
+            roomSizeDiv.innerHTML = "Preferred room size: " + preferredRoomSize;
             draw();
         }
 
@@ -149,10 +149,10 @@
             var roomWidth = 0;
             var roomHeight = 0;
             if (distributeHorizontally && innerTilesWide >= 5) {
-                // We need preferredRoomCount - 1 walls as well.
-                roomWidth = (innerTilesWide - (preferredRoomCount - 1)) / preferredRoomCount;
+                // We need preferredRoomSize - 1 walls as well.
+                roomWidth = (innerTilesWide - (preferredRoomSize - 1)) / preferredRoomSize;
             } else if (!distributeHorizontally && innerTilesHigh >= 5) {
-                roomHeight = (innerTilesHigh - (preferredRoomCount - 1)) / preferredRoomCount;
+                roomHeight = (innerTilesHigh - (preferredRoomSize - 1)) / preferredRoomSize;
             }
 
             var wallColour = "#aa3333";
@@ -166,11 +166,11 @@
                         ctx.fillStyle = "#222222";
 
                         if (roomWidth > 0) {
-                            var wallsEncountered = column / (preferredRoomCount + 1);
+                            var wallsEncountered = column / (preferredRoomSize + 1);
                             if (wallsEncountered - Math.floor(wallsEncountered) == 0)
                                 ctx.fillStyle = wallColour;
                         } else if (roomHeight > 0) {
-                            var wallsEncountered = row / (preferredRoomCount + 1);
+                            var wallsEncountered = row / (preferredRoomSize + 1);
                             if (wallsEncountered - Math.floor(wallsEncountered) == 0)
                                 ctx.fillStyle = wallColour;
                         }
