@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset=utf-8 />
+    <title>Rimworld Room Planner</title>
+    <style>
+        body {
+            background: #000;
+        }
+        /*         canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+        } */
+    </style>
+</head>
+
+<body>
+    <canvas height="600" width="600"></canvas>
+    <script>
+        var canvas = document.getElementsByTagName('canvas')[0],
+            ctx = null,
+            grad = null,
+            body = document.getElementsByTagName('body')[0],
+            color = 255;
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        var pressX = 0;
+        var pressY = 0;
+        var isPressed = false;
+        var currentMouseX = 0;
+        var currentMouseY = 0;
+        var releaseX = 0;
+        var releaseY = 0;
+        var drawRoom = false;
+
+        ctx = canvas.getContext('2d');
+        if (ctx) {
+            setupEvents();
+            draw();
+        }
+
+        // http://stackoverflow.com/a/17130415/904422
+        function getMousePos(canvas, evt) {
+            var rect = canvas.getBoundingClientRect(), // abs. size of element
+                scaleX = canvas.width / rect.width, // relationship bitmap vs. element for X
+                scaleY = canvas.height / rect.height; // relationship bitmap vs. element for Y
+
+            return {
+                x: (evt.clientX - rect.left) * scaleX, // scale mouse coordinates after they have
+                y: (evt.clientY - rect.top) * scaleY // been adjusted to be relative to element
+            }
+        }
+
+        function setupEvents() {
+            body.onmousedown = function(event) {
+                if (event.button === 0) {
+                    isPressed = true;
+                    drawRoom = true;
+                    var mousePos = getMousePos(canvas, event);
+                    pressX = mousePos.x;
+                    pressY = mousePos.y;
+                } else {
+                    isPressed = false;
+                    drawRoom = false;
+
+                    draw();
+                }
+            }
+
+            body.onmousemove = function(event) {
+                //                 var width = window.innerWidth;
+                //                 var height = window.innerHeight;
+                var mousePos = getMousePos(canvas, event);
+                currentMouseX = mousePos.x;
+                currentMouseY = mousePos.y;
+
+                getMousePos(canvas, event)
+
+                draw();
+            };
+
+            body.onmouseup = function(event) {
+                currentMouseX = -1;
+                currentMouseY = -1;
+                var mousePos = getMousePos(canvas, event);
+                releaseX = mousePos.x;
+                releaseY = mousePos.y;
+                isPressed = false;
+
+                draw();
+            };
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (!drawRoom)
+                return;
+
+            var tileWidth = 50;
+            var tileHeight = 50;
+            var areaX = pressX;
+            var areaY = pressY;
+            var areaWidth = (isPressed ? currentMouseX : releaseX) - pressX;
+            var areaHeight = (isPressed ? currentMouseY : releaseY) - pressY;
+            var tilesWide = Math.max(1, Math.ceil(areaWidth / tileWidth));
+            var tilesHigh = Math.max(1, Math.ceil(areaHeight / tileHeight));
+            var innerTilesWide = Math.max(0, tilesWide - 2);
+            var innerTilesHigh = Math.max(0, tilesHigh - 2);
+
+            //ctx.fillRect(areaX, areaY, areaWidth, areaHeight);
+
+            ctx.strokeStyle = "black";
+            for (var row = 0; row < tilesHigh; ++row) {
+                for (var column = 0; column < tilesWide; ++column) {
+                    var isEdge = (column == 0 || column == tilesWide - 1 || row == 0 || row == tilesHigh - 1);
+                    if (isEdge)
+                        ctx.fillStyle = "#aa3333";
+                    else
+                        ctx.fillStyle = "transparent";
+                    ctx.fillRect(areaX + (column * tileWidth), areaY + (row * tileHeight), tileWidth, tileHeight);
+                    ctx.strokeRect(areaX + (column * tileWidth), areaY + (row * tileHeight), tileWidth, tileHeight);
+                }
+            }
+
+            // Draw total height text guide
+            ctx.font = "40px sans-serif";
+            ctx.fillStyle = "white";
+            ctx.textAlign = "right";
+            ctx.textBaseline = "hanging";
+            var mWidth = ctx.measureText("M").width;
+            var totalHeightTextY = Math.max(areaY, areaY + areaHeight / 2 - mWidth / 2);
+            ctx.fillText(tilesHigh, areaX - 10, totalHeightTextY);
+
+            // Draw upper total height line guide.
+            ctx.beginPath();
+            ctx.strokeStyle = "white";
+            ctx.moveTo(areaX - 20, areaY);
+            ctx.lineTo(areaX - 20, Math.max(areaY, totalHeightTextY - 10))
+            ctx.stroke();
+
+            // Draw lower total height line guide.
+            ctx.beginPath();
+            ctx.strokeStyle = "white";
+            ctx.moveTo(areaX - 20, totalHeightTextY + mWidth + 4);
+            ctx.lineTo(areaX - 20, areaY + (tilesHigh * tileHeight));
+            ctx.stroke();
+
+            // Draw total width text guide
+            ctx.textAlign = "left";
+            var widthTextWidth = ctx.measureText(tilesWide).width;
+            var totalWidthTextX = Math.max(areaX, areaX + areaWidth / 2 - widthTextWidth / 2);
+            ctx.fillText(tilesWide, totalWidthTextX, areaY - mWidth);
+
+            // Draw left total height line guide.
+            ctx.beginPath();
+            ctx.strokeStyle = "white";
+            ctx.moveTo(areaX, areaY - 20);
+            ctx.lineTo(totalWidthTextX - 10, areaY - 20)
+            ctx.stroke();
+
+            // Draw right total height line guide.
+            ctx.beginPath();
+            ctx.strokeStyle = "white";
+            ctx.moveTo(totalWidthTextX + widthTextWidth + 10, areaY - 20);
+            ctx.lineTo(areaX + (tilesWide * tileWidth), areaY - 20);
+            ctx.stroke();
+
+            if (innerTilesHigh > 0 && innerTilesWide > 0) {
+                if (innerTilesHigh > 1) {
+                    // Draw inner height text guide
+                    ctx.textAlign = "left";
+                    ctx.textBaseline = "hanging";
+                    var innerHeightTextY = Math.max(areaY + tileHeight * 2, areaY + areaHeight / 2 - mWidth / 2);
+                    ctx.fillText(innerTilesHigh, areaX + tileWidth + 10, innerHeightTextY);
+
+                    // Draw upper inner height line guide.
+                    ctx.beginPath();
+                    ctx.strokeStyle = "white";
+                    ctx.moveTo(areaX + tileWidth + 20, areaY + tileHeight + 20);
+                    ctx.lineTo(areaX + tileWidth + 20, Math.max(areaY + tileHeight + 20, innerHeightTextY - 10))
+                    ctx.stroke();
+
+                    // Draw lower inner height line guide.
+                    ctx.beginPath();
+                    ctx.strokeStyle = "white";
+                    ctx.moveTo(areaX + tileWidth + 20, innerHeightTextY + mWidth + 4);
+                    ctx.lineTo(areaX + tileWidth + 20, areaY + ((tilesHigh - 1) * tileHeight));
+                    ctx.stroke();
+                }
+
+                if (innerTilesWide > 1) {
+                    // Draw inner width text guide
+                    ctx.textAlign = "left";
+                    var innerWidthTextWidth = ctx.measureText(innerTilesWide).width;
+                    var innerWidthTextX = Math.max(areaX + tileWidth * 2, areaX + areaWidth / 2 - innerWidthTextWidth / 2);
+                    ctx.fillText(innerTilesWide, innerWidthTextX, areaY + tileHeight + 10);
+
+                    // Draw left inner width line guide.
+                    ctx.beginPath();
+                    ctx.strokeStyle = "white";
+                    ctx.moveTo(areaX + tileWidth + 20, areaY + tileHeight + 20);
+                    ctx.lineTo(innerWidthTextX - 10, areaY + tileHeight + 20);
+                    ctx.stroke();
+
+                    // Draw right inner width line guide.
+                    ctx.beginPath();
+                    ctx.strokeStyle = "white";
+                    ctx.moveTo(innerWidthTextX + innerWidthTextWidth + 10, areaY + tileHeight + 20);
+                    ctx.lineTo(areaX + tileWidth + (innerTilesWide * tileWidth), areaY + tileHeight + 20);
+                    ctx.stroke();
+                }
+            }
+        }
+    </script>
+    <!--     <a href="http://github.com/mitchcurtis/rimworld-room-planner"><img style="position: absolute; top: 0; left: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_left_darkblue_121621.png" alt="Fork me on GitHub" /></a> -->
+</body>
+
+</html>
