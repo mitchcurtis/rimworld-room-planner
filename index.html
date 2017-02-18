@@ -134,8 +134,8 @@
             if (!drawRoom)
                 return;
 
-            var tileWidth = 50;
-            var tileHeight = 50;
+            var tileWidth = 30;
+            var tileHeight = 30;
             var areaX = pressX;
             var areaY = pressY;
             var areaWidth = (isPressed ? currentMouseX : releaseX) - pressX;
@@ -181,7 +181,7 @@
             }
 
             // Draw total height text guide
-            ctx.font = "40px sans-serif";
+            ctx.font = "30px sans-serif";
             ctx.fillStyle = "white";
             ctx.textAlign = "right";
             ctx.textBaseline = "hanging";
