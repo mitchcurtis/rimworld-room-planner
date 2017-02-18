@@ -162,7 +162,7 @@
             ctx.beginPath();
             ctx.strokeStyle = "white";
             ctx.moveTo(areaX, areaY - 20);
-            ctx.lineTo(totalWidthTextX - 10, areaY - 20)
+            ctx.lineTo(Math.max(areaX, totalWidthTextX - 10), areaY - 20);
             ctx.stroke();
 
             // Draw right total height line guide.
