@@ -265,6 +265,7 @@
                 var r = tilesWide / 2;
                 var x = 0;
                 var y = 0;
+                // http://stackoverflow.com/a/14612409/904422
                 for (var j = x - r; j <= x + r; j++) {
                     for (var k = y - r; k <= y + r; k++) {
                         if (distance({ x: j, y: k }, { x: x, y: y}) <= r) {
