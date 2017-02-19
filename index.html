@@ -79,23 +79,26 @@
         }
 
         // http://stackoverflow.com/a/17130415/904422
-        function getMousePos(canvas, evt) {
+        function getMousePos(canvas, clientX, clientY) {
             var rect = canvas.getBoundingClientRect(), // abs. size of element
                 scaleX = canvas.width / rect.width, // relationship bitmap vs. element for X
                 scaleY = canvas.height / rect.height; // relationship bitmap vs. element for Y
 
             return {
-                x: (evt.clientX - rect.left) * scaleX, // scale mouse coordinates after they have
-                y: (evt.clientY - rect.top) * scaleY // been adjusted to be relative to element
+                x: (clientX - rect.left) * scaleX, // scale mouse coordinates after they have
+                y: (clientY - rect.top) * scaleY // been adjusted to be relative to element
             }
         }
 
         function setupEvents() {
-            canvas.onmousedown = function(event) {
-                if (event.button === 0) {
+            function handleMouseDown(clientX, clientY, button) {
+                if (button === undefined)
+                    button = 0;
+
+                if (button === 0) {
                     isPressed = true;
                     drawRoom = true;
-                    var mousePos = getMousePos(canvas, event);
+                    var mousePos = getMousePos(canvas, clientX, clientY);
                     pressX = mousePos.x;
                     pressY = mousePos.y;
                 } else {
@@ -106,26 +109,55 @@
                 }
             }
 
-            canvas.onmousemove = function(event) {
-                var mousePos = getMousePos(canvas, event);
+            function handleMouseMove(clientX, clientY) {
+                 var mousePos = getMousePos(canvas, clientX, clientY);
                 currentMouseX = mousePos.x;
                 currentMouseY = mousePos.y;
 
-                getMousePos(canvas, event)
-
                 draw();
-            };
+            }
 
-            canvas.onmouseup = function(event) {
+            function handleMouseUp(clientX, clientY) {
                 currentMouseX = -1;
                 currentMouseY = -1;
-                var mousePos = getMousePos(canvas, event);
+                var mousePos = getMousePos(canvas, clientX, clientY);
                 releaseX = mousePos.x;
                 releaseY = mousePos.y;
                 isPressed = false;
 
                 draw();
+            }
+
+            canvas.onmousedown = function(event) {
+                handleMouseDown(event.clientX, event.clientY);
             };
+
+            canvas.onmousemove = function(event) {
+                handleMouseMove(event.clientX, event.clientY);
+            };
+
+            canvas.onmouseup = function(event) {
+                handleMouseUp(event.clientX, event.clientY);
+            };
+
+            function handleTouchStart(event) {
+                event.preventDefault();
+                handleMouseDown(event.touches[0].clientX, event.touches[0].clientY);
+            }
+
+            function handleTouchMove(event) {
+                event.preventDefault();
+                handleMouseMove(event.touches[0].clientX, event.touches[0].clientY);
+            }
+
+            function handleTouchEnd(event) {
+                event.preventDefault();
+                handleMouseUp(event.changedTouches[0].clientX, event.changedTouches[0].clientY);
+            }
+
+            canvas.addEventListener("touchstart", handleTouchStart, false);
+            canvas.addEventListener("touchmove", handleTouchMove, false);
+            canvas.addEventListener("touchend", handleTouchEnd, false);
         }
 
         function draw() {
