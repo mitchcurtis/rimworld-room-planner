@@ -28,7 +28,7 @@
             <div id="rectangularOptionsDiv">
                 <div id="roomSizeRow" class="optionRow">
                     <button id="decreaseRoomSize">-</button>
-                    <div id="roomSizeDiv" class="roomSizeLabel">Room size: 3</div>
+                    <div id="roomSizeDiv">Room size: 3</div>
                     <button id="increaseRoomSize">+</button>
                 </div>
                 <div>
@@ -86,25 +86,26 @@
         }
 
         // Rectangular options
-        var roomSizeDiv = document.getElementById("roomSizeDiv");
+        var roomSizeDiv = $("#roomSizeDiv");
         var decreaseRoomSizeButton = document.getElementById("decreaseRoomSize");
         decreaseRoomSizeButton.onmousedown = function() {
             --roomSize;
             if (roomSize < 1)
                 roomSize = 1;
-            roomSizeDiv.innerHTML = "Room size: " + roomSize;
+            roomSizeDiv.text("Room size: " + roomSize);
             draw();
         }
         var increaseRoomSize = document.getElementById("increaseRoomSize");
         increaseRoomSize.onmousedown = function() {
             ++roomSize;
-            roomSizeDiv.innerHTML = "Room size: " + roomSize;
+            roomSizeDiv.text("Room size: " + roomSize);
             draw();
         }
 
         document.getElementById("squareRoomsLabel").onclick = function() {
             hasSquareRooms = document.getElementById("squareRoomsCheckBox").checked;
             $("#roomSizeRow *").prop("disabled", hasSquareRooms);
+            roomSizeDiv.css({ opacity: hasSquareRooms ? 0.4 : 1.0 });
             draw();
         }
 

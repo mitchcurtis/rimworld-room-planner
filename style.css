@@ -36,14 +36,12 @@ button {
 #shapeRow {
     margin-bottom: 40px;
 }
-.optionRow {
-    margin-bottom: 20px;
-}
-.roomSizeLabel {
-    margin-left: 10px;
+#decreaseRoomSize {
     margin-right: 10px;
 }
-.disabledDiv {
-    pointer-events: none
-    opacity: 0.4
+#increaseRoomSize {
+    margin-left: 10px;
+}
+.optionRow {
+    margin-bottom: 20px;
 }
