@@ -4,19 +4,37 @@
 <head>
     <meta charset=utf-8 />
     <title>RimWorld Room Planner</title>
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="style.css" />
 </head>
 
 <body>
     <canvas height="600" width="600"></canvas>
-    <div id="sidePanel">
+     <div id="sidePanel">
         <button id="optionsButton">Options</button>
         <div id="optionsDiv">
-            <div id="roomSizeRow" class="optionRow">
-                <button id="decreaseRoomSize">-</button>
-                <div id="roomSizeDiv" class="text">Room size: 3</div>
-                <button id="increaseRoomSize">+</button>
-            <div>
+            <div id="shapeRow" class="optionRow">
+                <form>
+                    <label id="rectangularRadioLabel" class="switch">
+                        <input id="rectangularRadioButton" type="radio" name="shape" value="rectangular" checked="true"> Rectangular
+                    </label>
+                    <br />
+                    <label id="circularRadioLabel" class="switch">
+                        <input id="circularRadioButton" type="radio" name="shape" value="circular"> Circular (Unfinished)
+                    </label>
+                </form>
+            </div>
+            <div id="rectangularOptionsDiv">
+                <div id="roomSizeRow" class="optionRow">
+                    <button id="decreaseRoomSize">-</button>
+                    <div id="roomSizeDiv" class="roomSizeLabel">Room size: 3</div>
+                    <button id="increaseRoomSize">+</button>
+                </div>
+                <label id="squareLabel" class="switch">
+                    <input id="squareCheckBox" type="checkbox"> Square Outer Area
+                </label>
+            </div>
+            <div id="circularOptionsDiv">
+            </div>
         </div>
     </div>
     <script>
@@ -34,7 +52,11 @@
         var releaseX = 0;
         var releaseY = 0;
         var drawRoom = false;
+        var isRectangular = true;
+
+        // Rectangular options
         var roomSize = 3;
+        var isSquare = false;
 
         ctx = canvas.getContext('2d');
         if (ctx) {
@@ -43,6 +65,26 @@
         }
 
         // Set up events for buttons.
+        var optionsButton = document.getElementById("optionsButton");
+        var optionsDiv = document.getElementById("optionsDiv");
+        optionsButton.onmousedown = function() {
+            optionsDiv.style.display = optionsDiv.style.display === "none" ? "block" : "none";
+        }
+
+        document.getElementById("rectangularRadioLabel").onclick = function() {
+            isRectangular = true;
+            document.getElementById("rectangularOptionsDiv").style.display = "block";
+            document.getElementById("circularOptionsDiv").style.display = "none";
+            draw();
+        }
+        document.getElementById("circularRadioLabel").onclick = function() {
+            isRectangular = false;
+            document.getElementById("rectangularOptionsDiv").style.display = "none";
+            document.getElementById("circularOptionsDiv").style.display = "block";
+            draw();
+        }
+
+        // Rectangular options
         var roomSizeDiv = document.getElementById("roomSizeDiv");
         var decreaseRoomSizeButton = document.getElementById("decreaseRoomSize");
         decreaseRoomSizeButton.onmousedown = function() {
@@ -59,10 +101,9 @@
             draw();
         }
 
-        var optionsButton = document.getElementById("optionsButton");
-        var optionsDiv = document.getElementById("optionsDiv");
-        optionsButton.onmousedown = function() {
-            optionsDiv.style.display = optionsDiv.style.display === "none" ? "block" : "none";
+        document.getElementById("squareLabel").onclick = function() {
+            isSquare = document.getElementById("squareCheckBox").checked;
+            draw();
         }
 
         // Fill the screen with the canvas.
@@ -104,7 +145,7 @@
             }
 
             function handleMouseMove(clientX, clientY) {
-                 var mousePos = getMousePos(canvas, clientX, clientY);
+                var mousePos = getMousePos(canvas, clientX, clientY);
                 currentMouseX = mousePos.x;
                 currentMouseY = mousePos.y;
 
@@ -166,6 +207,11 @@
             var areaY = pressY;
             var areaWidth = (isPressed ? currentMouseX : releaseX) - pressX;
             var areaHeight = (isPressed ? currentMouseY : releaseY) - pressY;
+            if (!isRectangular || isSquare) {
+                // If it's circular, its width and height have to be equal, so pick the lesser of the two.
+                areaWidth = Math.min(areaWidth, areaHeight);
+                areaHeight = areaWidth;
+            }
             var tilesWide = Math.max(1, Math.ceil(areaWidth / tileWidth));
             var tilesHigh = Math.max(1, Math.ceil(areaHeight / tileHeight));
             var innerTilesWide = Math.max(0, tilesWide - 2);
