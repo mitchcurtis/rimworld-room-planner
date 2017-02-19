@@ -40,3 +40,7 @@ button {
     margin-left: 10px;
     margin-right: 10px;
 }
+.disabledDiv {
+    pointer-events: none
+    opacity: 0.4
+}

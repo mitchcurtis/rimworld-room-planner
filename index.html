@@ -5,6 +5,7 @@
     <meta charset=utf-8 />
     <title>RimWorld Room Planner</title>
     <link rel="stylesheet" type="text/css" href="style.css" />
+    <script src="jquery-3.1.1.min.js"></script>
 </head>
 
 <body>
@@ -19,7 +20,7 @@
                     </label>
                     <br />
                     <label id="circularRadioLabel" class="switch">
-                        <input id="circularRadioButton" type="radio" name="shape" value="circular"> Circular (Unfinished)
+                        <input id="circularRadioButton" type="radio" name="shape" value="circular"> Circular (unfinished)
                     </label>
                 </form>
             </div>
@@ -29,20 +30,24 @@
                     <div id="roomSizeDiv" class="roomSizeLabel">Room size: 3</div>
                     <button id="increaseRoomSize">+</button>
                 </div>
-                <label id="squareLabel" class="switch">
-                    <input id="squareCheckBox" type="checkbox"> Square Outer Area
-                </label>
+                <div>
+                    <label id="squareLabel">
+                        <input id="squareCheckBox" type="checkbox"> Square outer area
+                    </label>
+                </div>
+                <div>
+                    <label id="squareRoomsLabel">
+                        <input id="squareRoomsCheckBox" type="checkbox"> Square rooms
+                    </label>
+                </div>
             </div>
             <div id="circularOptionsDiv">
             </div>
         </div>
     </div>
     <script>
-        var canvas = document.getElementsByTagName('canvas')[0],
-            ctx = null,
-            grad = null,
-            body = document.getElementsByTagName('body')[0],
-            color = 255;
+        var canvas = document.getElementsByTagName('canvas')[0];
+        var body = document.getElementsByTagName('body')[0];
 
         var pressX = 0;
         var pressY = 0;
@@ -57,8 +62,9 @@
         // Rectangular options
         var roomSize = 3;
         var isSquare = false;
+        var hasSquareRooms = false;
 
-        ctx = canvas.getContext('2d');
+        var ctx = canvas.getContext('2d');
         if (ctx) {
             setupEvents();
             draw();
@@ -103,6 +109,14 @@
 
         document.getElementById("squareLabel").onclick = function() {
             isSquare = document.getElementById("squareCheckBox").checked;
+            $("#squareRoomsLabel *").prop("disabled", isSquare);
+            draw();
+        }
+
+        document.getElementById("squareRoomsLabel").onclick = function() {
+            hasSquareRooms = document.getElementById("squareRoomsCheckBox").checked;
+            $("#roomSizeRow *").prop("disabled", hasSquareRooms);
+            $("#squareLabel *").prop("disabled", hasSquareRooms);
             draw();
         }
 
@@ -223,13 +237,21 @@
             if (isRectangular) {
                 // Draw rectangular area
                 var distributeHorizontally = tilesWide > tilesHigh;
+                var effectiveRoomSize = hasSquareRooms ? (distributeHorizontally ? innerTilesHigh : innerTilesWide) : roomSize;
+                console.log(hasSquareRooms, distributeHorizontally, innerTilesHigh, innerTilesWide, effectiveRoomSize)
                 var roomWidth = 0;
                 var roomHeight = 0;
+                // Can't make rooms with less than 5 inner tiles.
                 if (distributeHorizontally && innerTilesWide >= 5) {
-                    // We need roomSize - 1 walls as well.
-                    roomWidth = (innerTilesWide - (roomSize - 1)) / roomSize;
+//                     console.log(hasSquareRooms, innerTilesHigh)
+                    if (hasSquareRooms) {
+                        roomWidth = innerTilesHigh;
+                    } else {
+                        // We need effectiveRoomSize - 1 walls as well.
+                        roomWidth = (innerTilesWide - (effectiveRoomSize - 1)) / effectiveRoomSize;
+                    }
                 } else if (!distributeHorizontally && innerTilesHigh >= 5) {
-                    roomHeight = (innerTilesHigh - (roomSize - 1)) / roomSize;
+                    roomHeight = (innerTilesHigh - (effectiveRoomSize - 1)) / effectiveRoomSize;
                 }
 
                 for (var row = 0; row < tilesHigh; ++row) {
@@ -241,11 +263,11 @@
                             ctx.fillStyle = "#222222";
 
                             if (roomWidth > 0) {
-                                var wallsEncountered = column / (roomSize + 1);
+                                var wallsEncountered = column / (effectiveRoomSize + 1);
                                 if (wallsEncountered - Math.floor(wallsEncountered) == 0)
                                     ctx.fillStyle = wallColour;
                             } else if (roomHeight > 0) {
-                                var wallsEncountered = row / (roomSize + 1);
+                                var wallsEncountered = row / (effectiveRoomSize + 1);
                                 if (wallsEncountered - Math.floor(wallsEncountered) == 0)
                                     ctx.fillStyle = wallColour;
                             }
