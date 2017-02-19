@@ -262,19 +262,19 @@
                     return Math.sqrt(dx + dy);
                 }
 
-                var r = tilesWide / 2;
+                var radius = tilesWide / 2;
                 var x = 0;
                 var y = 0;
                 // http://stackoverflow.com/a/14612409/904422
-                for (var j = x - r; j <= x + r; j++) {
-                    for (var k = y - r; k <= y + r; k++) {
-                        if (distance({ x: j, y: k }, { x: x, y: y}) <= r) {
+                for (var j = x - radius; j <= x + radius; j++) {
+                    for (var k = y - radius; k <= y + radius; k++) {
+                        if (distance({ x: j, y: k }, { x: x, y: y}) <= radius) {
                             var row = k;
                             var column = j;
 
                             ctx.fillStyle = wallColour;
-                            var tileX = areaX + (column * tileWidth) + (r * tileWidth);
-                            var tileY = areaY + (row * tileHeight) + (r * tileHeight);
+                            var tileX = areaX + (column * tileWidth) + (radius * tileWidth);
+                            var tileY = areaY + (row * tileHeight) + (radius * tileHeight);
                             ctx.fillRect(tileX, tileY, tileWidth, tileHeight);
                             ctx.strokeRect(tileX, tileY, tileWidth, tileHeight);
                         }
