@@ -12,6 +12,7 @@
     <canvas height="600" width="600"></canvas>
     <div id="sidePanel">
         <button id="optionsButton">Options</button>
+        <p class="helpText">(Click to toggle options)</p>
         <div id="optionsDiv">
             <div id="shapeRow" class="optionRow">
                 <form>
@@ -225,20 +226,14 @@
                 // Draw rectangular area
                 var distributeHorizontally = tilesWide > tilesHigh;
                 var effectiveRoomSize = hasSquareRooms ? (distributeHorizontally ? innerTilesHigh : innerTilesWide) : roomSize;
-                console.log(hasSquareRooms, distributeHorizontally, innerTilesHigh, innerTilesWide, effectiveRoomSize)
-                var roomWidth = 0;
-                var roomHeight = 0;
+                var canDrawRoomsHorizontally = false;
+                var canDrawRoomsVertically = false;
                 // Can't make rooms with less than 5 inner tiles.
                 if (distributeHorizontally && innerTilesWide >= 5) {
-//                     console.log(hasSquareRooms, innerTilesHigh)
-                    if (hasSquareRooms) {
-                        roomWidth = innerTilesHigh;
-                    } else {
-                        // We need effectiveRoomSize - 1 walls as well.
-                        roomWidth = (innerTilesWide - (effectiveRoomSize - 1)) / effectiveRoomSize;
-                    }
+                    // We need effectiveRoomSize - 1 walls as well.
+                    canDrawRoomsHorizontally = ((innerTilesWide - (effectiveRoomSize - 1)) / effectiveRoomSize) > 0;
                 } else if (!distributeHorizontally && innerTilesHigh >= 5) {
-                    roomHeight = (innerTilesHigh - (effectiveRoomSize - 1)) / effectiveRoomSize;
+                    canDrawRoomsVertically = ((innerTilesHigh - (effectiveRoomSize - 1)) / effectiveRoomSize) > 0;
                 }
 
                 for (var row = 0; row < tilesHigh; ++row) {
@@ -249,11 +244,11 @@
                         else {
                             ctx.fillStyle = "#222222";
 
-                            if (roomWidth > 0) {
+                            if (canDrawRoomsHorizontally) {
                                 var wallsEncountered = column / (effectiveRoomSize + 1);
                                 if (wallsEncountered - Math.floor(wallsEncountered) == 0)
                                     ctx.fillStyle = wallColour;
-                            } else if (roomHeight > 0) {
+                            } else if (canDrawRoomsVertically) {
                                 var wallsEncountered = row / (effectiveRoomSize + 1);
                                 if (wallsEncountered - Math.floor(wallsEncountered) == 0)
                                     ctx.fillStyle = wallColour;

@@ -18,6 +18,10 @@ label {
     font-size: 24pt;
     color: #ffefef;
 }
+.helpText {
+    color: #ffefef;
+    margin-bottom: 20px;
+}
 button {
     font-size: 20pt;
     padding-left: 20px;
@@ -28,7 +32,6 @@ button {
     font-size: 30px;
     padding-left: 40px;
     padding-right: 40px;
-    margin-bottom: 20px;
 }
 #shapeRow {
     margin-bottom: 40px;
