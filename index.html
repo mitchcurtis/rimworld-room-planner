@@ -4,37 +4,20 @@
 <head>
     <meta charset=utf-8 />
     <title>RimWorld Room Planner</title>
-    <style>
-        body {
-            background: #000;
-        }
-        #sidePanel {
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 1;
-            margin-top: 10px;
-            margin-left: 10px;
-        }
-        #roomSizeDiv {
-            display: inline;
-            font-size: 24pt;
-            color: #ffefef;
-        }
-        button {
-            font-size: 18pt;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 
 <body>
     <canvas height="600" width="600"></canvas>
     <div id="sidePanel">
-        <span id="roomSizeSpan">
-            <button id="decreaseRoomSize">-</button>
-            <div id="roomSizeDiv" class="text">Room size: 3</div>
-            <button id="increaseRoomSize">+</button>
-        <span>
+        <button id="optionsButton">Options</button>
+        <div id="optionsDiv">
+            <div id="roomSizeRow" class="optionRow">
+                <button id="decreaseRoomSize">-</button>
+                <div id="roomSizeDiv" class="text">Room size: 3</div>
+                <button id="increaseRoomSize">+</button>
+            <div>
+        </div>
     </div>
     <script>
         var canvas = document.getElementsByTagName('canvas')[0],
@@ -51,7 +34,7 @@
         var releaseX = 0;
         var releaseY = 0;
         var drawRoom = false;
-        var preferredRoomSize = 3;
+        var roomSize = 3;
 
         ctx = canvas.getContext('2d');
         if (ctx) {
@@ -59,22 +42,30 @@
             draw();
         }
 
+        // Set up events for buttons.
         var roomSizeDiv = document.getElementById("roomSizeDiv");
         var decreaseRoomSizeButton = document.getElementById("decreaseRoomSize");
         decreaseRoomSizeButton.onmousedown = function() {
-            --preferredRoomSize;
-            if (preferredRoomSize < 1)
-                preferredRoomSize = 1;
-            roomSizeDiv.innerHTML = "Preferred room size: " + preferredRoomSize;
+            --roomSize;
+            if (roomSize < 1)
+                roomSize = 1;
+            roomSizeDiv.innerHTML = "Room size: " + roomSize;
             draw();
         }
         var increaseRoomSize = document.getElementById("increaseRoomSize");
         increaseRoomSize.onmousedown = function() {
-            ++preferredRoomSize;
-            roomSizeDiv.innerHTML = "Preferred room size: " + preferredRoomSize;
+            ++roomSize;
+            roomSizeDiv.innerHTML = "Room size: " + roomSize;
             draw();
         }
 
+        var optionsButton = document.getElementById("optionsButton");
+        var optionsDiv = document.getElementById("optionsDiv");
+        optionsButton.onmousedown = function() {
+            optionsDiv.style.display = optionsDiv.style.display === "none" ? "block" : "none";
+        }
+
+        // Fill the screen with the canvas.
         window.onload = function() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
@@ -92,6 +83,7 @@
             }
         }
 
+        // Handle user interaction with the canvas.
         function setupEvents() {
             function handleMouseDown(clientX, clientY, button) {
                 if (button === undefined)
@@ -183,10 +175,10 @@
             var roomWidth = 0;
             var roomHeight = 0;
             if (distributeHorizontally && innerTilesWide >= 5) {
-                // We need preferredRoomSize - 1 walls as well.
-                roomWidth = (innerTilesWide - (preferredRoomSize - 1)) / preferredRoomSize;
+                // We need roomSize - 1 walls as well.
+                roomWidth = (innerTilesWide - (roomSize - 1)) / roomSize;
             } else if (!distributeHorizontally && innerTilesHigh >= 5) {
-                roomHeight = (innerTilesHigh - (preferredRoomSize - 1)) / preferredRoomSize;
+                roomHeight = (innerTilesHigh - (roomSize - 1)) / roomSize;
             }
 
             var wallColour = "#aa3333";
@@ -200,11 +192,11 @@
                         ctx.fillStyle = "#222222";
 
                         if (roomWidth > 0) {
-                            var wallsEncountered = column / (preferredRoomSize + 1);
+                            var wallsEncountered = column / (roomSize + 1);
                             if (wallsEncountered - Math.floor(wallsEncountered) == 0)
                                 ctx.fillStyle = wallColour;
                         } else if (roomHeight > 0) {
-                            var wallsEncountered = row / (preferredRoomSize + 1);
+                            var wallsEncountered = row / (roomSize + 1);
                             if (wallsEncountered - Math.floor(wallsEncountered) == 0)
                                 ctx.fillStyle = wallColour;
                         }
