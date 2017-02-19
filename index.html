@@ -31,11 +31,6 @@
                     <button id="increaseRoomSize">+</button>
                 </div>
                 <div>
-                    <label id="squareLabel">
-                        <input id="squareCheckBox" type="checkbox"> Square outer area
-                    </label>
-                </div>
-                <div>
                     <label id="squareRoomsLabel">
                         <input id="squareRoomsCheckBox" type="checkbox"> Square rooms
                     </label>
@@ -61,7 +56,6 @@
 
         // Rectangular options
         var roomSize = 3;
-        var isSquare = false;
         var hasSquareRooms = false;
 
         var ctx = canvas.getContext('2d');
@@ -107,16 +101,9 @@
             draw();
         }
 
-        document.getElementById("squareLabel").onclick = function() {
-            isSquare = document.getElementById("squareCheckBox").checked;
-            $("#squareRoomsLabel *").prop("disabled", isSquare);
-            draw();
-        }
-
         document.getElementById("squareRoomsLabel").onclick = function() {
             hasSquareRooms = document.getElementById("squareRoomsCheckBox").checked;
             $("#roomSizeRow *").prop("disabled", hasSquareRooms);
-            $("#squareLabel *").prop("disabled", hasSquareRooms);
             draw();
         }
 
@@ -221,7 +208,7 @@
             var areaY = pressY;
             var areaWidth = (isPressed ? currentMouseX : releaseX) - pressX;
             var areaHeight = (isPressed ? currentMouseY : releaseY) - pressY;
-            if (!isRectangular || isSquare) {
+            if (!isRectangular) {
                 // If it's circular, its width and height have to be equal, so pick the lesser of the two.
                 areaWidth = Math.min(areaWidth, areaHeight);
                 areaHeight = areaWidth;
